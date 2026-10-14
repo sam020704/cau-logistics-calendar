@@ -10,7 +10,20 @@
 #calendar .bars { position:absolute; top:34px; right:0; bottom:auto; left:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); grid-auto-rows:22px; row-gap:4px; align-content:start; pointer-events:none; }
 #calendar .bars .bar { box-sizing:border-box; display:block; height:22px; max-height:22px; min-height:22px; width:auto; min-width:0; padding:3px 6px; margin:0 2px; border:0; border-radius:4px; font-size:11px; line-height:16px; font-weight:650; text-align:left; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; overflow-wrap:normal !important; word-break:normal !important; pointer-events:auto; }
 @media(max-width:550px) { #calendar .bars .bar {font-size:10px; padding:3px 4px;} }
-</style></head><body><main class="shell"><header class="header"><div><div class="brand">◈ CAU Logistics Calendar</div><div class="sub">중앙대학교 국제물류학과 · 공지사항 & 일정</div></div><span class="pill">2026.08 이후 공지 · GitHub 자동 업데이트 · UI v3</span></header><div class="layout"><section class="panel"><div class="toolbar"><h2 id="monthTitle"></h2><div class="actions"><button class="btn" id="prev">‹</button><button class="btn" id="today">이번 달</button><button class="btn" id="next">›</button></div></div><div class="legend"><span><i class="dot color-인턴십"></i>인턴십</span><span><i class="dot color-장학금"></i>장학금</span><span><i class="dot color-학사"></i>학사</span><span><i class="dot color-행사"></i>행사</span></div><div class="importer"><label class="btn" for="detailFiles">공지 본문 HTML 가져오기</label><input id="detailFiles" type="file" accept=".html,.htm,text/html" multiple hidden><button class="btn" id="clearImported" type="button">추출 일정 초기화</button><span id="importStatus" class="hint" aria-live="polite"></span></div><p class="hint">날짜를 누르면 해당 날짜에 진행 중인 일정을 볼 수 있어요. 일정 바를 누르면 해당 일정이 선택됩니다.</p><div class="weekhead"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div id="calendar"></div></section><aside class="panel side"><h3 id="selectedTitle">날짜별 이벤트</h3><div id="eventList"></div><div class="section"><h3>실제 공지사항 <span id="noticeCount"></span></h3><input class="search" id="search" placeholder="공지 제목 검색" aria-label="공지 검색"><div class="notice-scroll" id="notices"></div></div></aside></div><p class="foot">출처: 중앙대학교 국제물류학과 공지사항. GitHub Actions가 갱신한 JSON을 불러옵니다. 본문 HTML을 수동으로 가져올 수도 있습니다. 선착순 모집 공지는 게시일에 표시될 수 있으며, 실제 신청 시작일을 의미하지 않습니다. 추출 결과는 원문에서 확인해 주세요.</p></main><script>
+
+/* UI v4: dates and event chips share normal document flow, never overlap. */
+#calendar .week-cells { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); min-height:56px; height:auto; align-items:stretch; border-top:1px solid #33445e; }
+#calendar .calendar-cell { min-width:0; min-height:56px; padding:6px 4px 8px; border-right:1px solid #33445e; background:#1a273b; display:flex; flex-direction:column; align-items:stretch; gap:7px; }
+#calendar .calendar-cell:last-child {border-right:0}
+#calendar .calendar-cell.out {background:#152136}
+#calendar .calendar-cell.sel {background:#2b3d59;box-shadow:inset 0 0 0 2px #e8bd55}
+#calendar .calendar-date { align-self:flex-start; flex:none; display:inline-flex; align-items:center; justify-content:center; min-width:25px; height:25px; padding:0 5px; background:#253650; color:#f4f8ff; border:0; border-radius:6px; font-size:13px; font-weight:800; position:static; }
+#calendar .calendar-cell.today .calendar-date {background:#c6a35b;color:#111827;border-radius:50%}
+#calendar .calendar-items {display:flex;flex-direction:column;gap:4px;min-width:0;}
+#calendar .calendar-chip {display:block;box-sizing:border-box;width:100%;min-width:0;height:24px;max-height:24px;flex:none;padding:4px 6px;border:0;border-radius:4px;text-align:left;color:#fff;font-size:11px;font-weight:650;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+#calendar .calendar-chip:hover {filter:brightness(1.2)}
+@media(max-width:550px){#calendar .calendar-cell{padding:5px 2px 6px;gap:5px}#calendar .calendar-chip{font-size:9px;padding:4px 3px;height:23px}#calendar .calendar-date{font-size:12px;min-width:22px;height:22px;padding:0 3px}}
+</style></head><body><main class="shell"><header class="header"><div><div class="brand">◈ CAU Logistics Calendar</div><div class="sub">중앙대학교 국제물류학과 · 공지사항 & 일정</div></div><span class="pill">2026.08 이후 공지 · GitHub 자동 업데이트 · UI v4</span></header><div class="layout"><section class="panel"><div class="toolbar"><h2 id="monthTitle"></h2><div class="actions"><button class="btn" id="prev">‹</button><button class="btn" id="today">이번 달</button><button class="btn" id="next">›</button></div></div><div class="legend"><span><i class="dot color-인턴십"></i>인턴십</span><span><i class="dot color-장학금"></i>장학금</span><span><i class="dot color-학사"></i>학사</span><span><i class="dot color-행사"></i>행사</span></div><div class="importer"><label class="btn" for="detailFiles">공지 본문 HTML 가져오기</label><input id="detailFiles" type="file" accept=".html,.htm,text/html" multiple hidden><button class="btn" id="clearImported" type="button">추출 일정 초기화</button><span id="importStatus" class="hint" aria-live="polite"></span></div><p class="hint">날짜를 누르면 해당 날짜에 진행 중인 일정을 볼 수 있어요. 일정 바를 누르면 해당 일정이 선택됩니다.</p><div class="weekhead"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div id="calendar"></div></section><aside class="panel side"><h3 id="selectedTitle">날짜별 이벤트</h3><div id="eventList"></div><div class="section"><h3>실제 공지사항 <span id="noticeCount"></span></h3><input class="search" id="search" placeholder="공지 제목 검색" aria-label="공지 검색"><div class="notice-scroll" id="notices"></div></div></aside></div><p class="foot">출처: 중앙대학교 국제물류학과 공지사항. GitHub Actions가 갱신한 JSON을 불러옵니다. 본문 HTML을 수동으로 가져올 수도 있습니다. 선착순 모집 공지는 게시일에 표시될 수 있으며, 실제 신청 시작일을 의미하지 않습니다. 추출 결과는 원문에서 확인해 주세요.</p></main><script>
 let notices=[];
 // 게시판 목록 HTML에는 본문이 없으므로 날짜를 임의로 생성하지 않습니다.
 // 상세 공지를 HTML로 저장해 가져오면 명시적인 신청/행사 날짜만 추출합니다.
@@ -26,7 +39,41 @@ const shift=(s,n)=>{const d=utc(s);d.setUTCDate(d.getUTCDate()+n);return d.toISO
 const active=()=>actualEvents;
 const dayEvents=date=>active().filter(e=>e.start<=date&&e.end>=date);
 function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n}
-function renderCalendar(){ $('monthTitle').textContent=`${shownYear}년 ${shownMonth}월`;const root=$('calendar');root.replaceChildren();const first=new Date(shownYear,shownMonth-1,1).getDay();const last=new Date(shownYear,shownMonth,0).getDate();const rows=Math.ceil((first+last)/7);const ev=active();for(let w=0;w<rows;w++){const wrap=el('div','weekwrap');const week=el('div','week');const dates=[];for(let d=0;d<7;d++){const day=w*7+d-first+1;const valid=day>=1&&day<=last;const date=valid?fmt(shownYear,shownMonth,day):null;dates.push(date);const b=el('button','day'+(!valid?' out':'')+(date===selected?' sel':'')+(date===new Date().toISOString().slice(0,10)?' today':''));b.type='button';b.disabled=!valid;b.setAttribute('aria-label',date||'다른 달');b.append(el('span','number',valid?String(day):''));if(valid)b.onclick=()=>{selected=date;selectedEvent=null;renderCalendar();renderSide()};week.append(b)}wrap.append(week);const bars=el('div','bars');let tracks=[];const rangeStart=dates.find(Boolean),rangeEnd=[...dates].reverse().find(Boolean);if(rangeStart){for(const e of ev){if(e.end<rangeStart||e.start>rangeEnd)continue;const firstCol=dates.findIndex(dt=>dt&&dt>=e.start&&dt<=e.end);let lastCol=-1;dates.forEach((dt,i)=>{if(dt&&dt>=e.start&&dt<=e.end)lastCol=i});if(firstCol<0||lastCol<0)continue;let track=0;while(tracks[track]?.some(([a,b])=>firstCol<=b&&lastCol>=a))track++;if(!tracks[track])tracks[track]=[];tracks[track].push([firstCol,lastCol]);const bar=el('button','bar',e.title);bar.type='button';bar.title=e.title+' ('+e.start+' ~ '+e.end+')';bar.setAttribute('aria-label',e.title+' / '+e.start+' ~ '+e.end);bar.style.background=colors[e.category]||'#536e96';bar.style.gridColumn=`${firstCol+1} / ${lastCol+2}`;bar.style.gridRow=String(track+1);bar.onclick=()=>{selected=dates[firstCol];selectedEvent=e.id;renderCalendar();renderSide()};bars.append(bar)}}wrap.append(bars);const h=tracks.length ? 40+tracks.length*26 : 56;wrap.style.height=h+'px';root.append(wrap)}}
+function renderCalendar(){
+  $('monthTitle').textContent=`${shownYear}년 ${shownMonth}월`;
+  const root=$('calendar');root.replaceChildren();
+  const first=new Date(shownYear,shownMonth-1,1).getDay();
+  const last=new Date(shownYear,shownMonth,0).getDate();
+  const rows=Math.ceil((first+last)/7);
+  const todayDate=fmt(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  for(let w=0;w<rows;w++){
+    const week=el('div','week week-cells');
+    for(let d=0;d<7;d++){
+      const day=w*7+d-first+1;
+      const valid=day>=1&&day<=last;
+      const date=valid?fmt(shownYear,shownMonth,day):null;
+      const cell=el('div','calendar-cell'+(!valid?' out':'')+(date===selected?' sel':'')+(date===todayDate?' today':''));
+      if(valid){
+        const dayButton=el('button','calendar-date',String(day));
+        dayButton.type='button';dayButton.setAttribute('aria-label',date+' 일정 보기');
+        dayButton.onclick=()=>{selected=date;selectedEvent=null;renderCalendar();renderSide()};
+        cell.append(dayButton);
+        const items=el('div','calendar-items');
+        for(const e of dayEvents(date)){
+          const bar=el('button','calendar-chip',e.title);
+          bar.type='button';bar.title=e.title;
+          bar.style.background=colors[e.category]||'#536e96';
+          bar.setAttribute('aria-label',e.title);
+          bar.onclick=()=>{selected=date;selectedEvent=e.id;renderCalendar();renderSide()};
+          items.append(bar);
+        }
+        cell.append(items);
+      }
+      week.append(cell);
+    }
+    root.append(week);
+  }
+}
 function renderSide(){const ev=dayEvents(selected);$('selectedTitle').textContent=`${selected.replaceAll('-','.')} 진행 중인 이벤트 (${ev.length})`;const box=$('eventList');box.replaceChildren();if(!ev.length){box.append(el('p','muted','선택한 날짜에 확인된 일정이 없습니다.'));return}for(const e of ev){const b=el('button','event');b.style.borderLeft=`5px solid ${colors[e.category]||'#718096'}`;b.append(el('strong','',e.title));b.append(el('small','',`${e.category} · ${e.start} ~ ${e.end}`));if(e.url){b.append(el('small','','원본 공지 열기 ↗'));b.onclick=()=>window.open(e.url,'_blank','noopener,noreferrer')}if(selectedEvent===e.id)b.style.background='#344a68';box.append(b)}}
 function renderNotices(){const q=$('search').value.trim().toLowerCase();const filtered=notices.filter(n=>n.title.toLowerCase().includes(q));$('noticeCount').textContent=`(${filtered.length})`;const root=$('notices');root.replaceChildren();for(const n of filtered){const row=el('div','notice');const a=el('a','',n.title+' ↗');a.href=n.url;a.target='_blank';a.rel='noopener noreferrer';row.append(a,el('small','',n.date+(n.attachment?' · 첨부파일 있음':'')));root.append(row)}if(!filtered.length)root.append(el('p','muted','검색 결과가 없습니다.'))}
 $('prev').onclick=()=>{shownMonth--;if(shownMonth<1){shownMonth=12;shownYear--}renderCalendar()};$('next').onclick=()=>{shownMonth++;if(shownMonth>12){shownMonth=1;shownYear++}renderCalendar()};$('today').onclick=()=>{const d=new Date();shownYear=d.getFullYear();shownMonth=d.getMonth()+1;selected=fmt(shownYear,shownMonth,d.getDate());renderCalendar();renderSide()};$('search').oninput=renderNotices;
