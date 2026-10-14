@@ -3,6 +3,8 @@ import argparse
 import json
 import re
 import time
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from datetime import date
 from pathlib import Path
 from urllib.parse import urlencode
@@ -13,7 +15,7 @@ from bs4 import BeautifulSoup
 BASE = 'https://log.cau.ac.kr/dm/dm_1.php'
 ROOT = Path(__file__).resolve().parents[1]
 CUTOFF = date(2026, 8, 1)
-HEADERS = {'User-Agent': 'CAU-Logistics-Calendar/1.0 (public notice index; low-frequency)'}
+HEADERS = {'User-Agent': 'CAU-Logistics-Calendar/1.1 (public notice index; low-frequency)'}
 ID_RE = re.compile(r"view\(['\"](\d+)['\"]")
 DATE_RE = re.compile(r'^(20\d{2})[./-](\d{1,2})[./-](\d{1,2})$')
 FULL = r'(20\d{2})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})\s*일?'
@@ -144,9 +146,21 @@ def detail_text(html, expected_id):
     raise RuntimeError(f'{expected_id}: 상세 본문 선택자 미확인. HTML 구조를 확인해 주세요')
 
 
-def crawl(max_pages=30, delay=1.5):
+def crawl(max_pages=30, delay=3.0):
     session = requests.Session()
     session.headers.update(HEADERS)
+    # A single bounded retry; do not hammer a server that refuses connections.
+    retry = Retry(
+        total=1, connect=1, read=1, status=1,
+        backoff_factor=2,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(['GET']),
+        respect_retry_after_header=True,
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('https://', adapter)
+    session.mount('http://', adapter)
     response = session.get(BASE, timeout=25)
     response.raise_for_status()
     response.encoding = response.apparent_encoding or 'utf-8'
@@ -186,6 +200,9 @@ def crawl(max_pages=30, delay=1.5):
         if page == max_pages:
             raise RuntimeError('최대 페이지에 도달했습니다. 수집 완전성을 확인하고 max-pages를 늘리세요')
         time.sleep(delay)
+    detail_ok = 0
+    detail_failed = 0
+    restored_events = 0
     for i, notice in enumerate(all_notices.values()):
         # POST with p_mode=view is a hypothesis based on form fields; fail closed on mismatch.
         try:
@@ -197,17 +214,25 @@ def crawl(max_pages=30, delay=1.5):
             response.encoding = response.apparent_encoding or 'utf-8'
             detail = response.text
             body = detail_text(detail, notice['id'])
+            detail_ok += 1
             for event in extract_events(body, notice):
                 all_events[event['id']] = event
         except (requests.RequestException, RuntimeError) as exc:
+            detail_failed += 1
             print(f'WARN detail {notice["id"]}: {exc}')
             # Preserve previously verified events when detail temporarily fails.
             for event in old_events.values():
                 if event.get('notice_id') == notice['id']:
                     all_events[event['id']] = event
+                    restored_events += 1
         time.sleep(delay)
     if not all_notices:
         raise RuntimeError('저장할 공지가 없습니다')
+    print(f'DETAIL_SUMMARY success={detail_ok} failed={detail_failed} '
+          f'preserved_events={restored_events}')
+    if detail_ok == 0:
+        # Do not publish misleading 'successful' fresh data when the site is inaccessible.
+        raise RuntimeError('모든 공지 상세 페이지 접근 실패: 기존 JSON 파일을 유지합니다')
     # Retain previous notices if temporarily missing from the source, avoiding destructive updates.
     all_notices = {**old_notices, **all_notices}
     return sorted(all_notices.values(), key=lambda x: (x['date'], int(x['id'])), reverse=True), list(all_events.values())
@@ -226,7 +251,7 @@ def load(filename):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--max-pages', type=int, default=30)
-    p.add_argument('--delay', type=float, default=1.5)
+    p.add_argument('--delay', type=float, default=3.0)
     args = p.parse_args()
     if args.max_pages < 2 or args.delay < 0.5:
         p.error('max-pages >= 2 and delay >= 0.5 required')
