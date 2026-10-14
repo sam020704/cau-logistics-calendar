@@ -24,7 +24,7 @@
 #calendar .calendar-chip:hover {filter:brightness(1.2)}
 @media(max-width:550px){#calendar .calendar-cell{padding:5px 2px 6px;gap:5px}#calendar .calendar-chip{font-size:9px;padding:4px 3px;height:23px}#calendar .calendar-date{font-size:12px;min-width:22px;height:22px;padding:0 3px}}
 
-/* White theme and Korean public holidays (UI v5) */
+/* White theme and Korean public holidays (UI v6 · 기간 막대) */
 :root{color-scheme:light;background:#f6f8fc;color:#192538}
 body{background:#f6f8fc;color:#192538}
 .header .brand{color:#17243a}.sub{color:#64748b}
@@ -65,6 +65,14 @@ body{background:#f6f8fc;color:#192538}
 #holidayStatus.error{color:#ad3944}
 .holiday-summary{font-size:12px;color:#c53545;font-weight:650;margin:5px 0 10px}
 @media(max-width:550px){#calendar .calendar-cell{padding:4px 2px 6px;gap:2px}#calendar .holiday-name{font-size:9px}#calendar .calendar-chip{font-size:9px}}
+
+/* UI v6: continuous bars for multi-day events, separate lanes for overlaps */
+#calendar .span-week{position:relative;min-height:56px;height:auto;overflow:hidden;}
+#calendar .span-week .calendar-cell{height:100%;min-height:0;}
+#calendar .calendar-span{position:absolute;z-index:2;box-sizing:border-box;height:23px;line-height:17px;padding:3px 7px;border:0;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;color:#fff;font-size:11px;font-weight:650;cursor:pointer;}
+#calendar .calendar-span:hover{filter:brightness(1.1)}
+#calendar .calendar-date{position:relative;z-index:3}
+@media(max-width:550px){#calendar .calendar-span{font-size:9px;padding:3px 4px}}
 </style></head><body><main class="shell"><header class="header"><div><div class="brand">◈ CAU Logistics Calendar</div><div class="sub">중앙대학교 국제물류학과 · 공지사항 & 일정</div></div><span class="pill">2026.08 이후 공지 · GitHub 자동 업데이트 · UI v5</span></header><div class="layout"><section class="panel"><div class="toolbar"><h2 id="monthTitle"></h2><div class="actions"><button class="btn" id="prev">‹</button><button class="btn" id="today">이번 달</button><button class="btn" id="next">›</button></div></div><div class="legend"><span><i class="dot color-인턴십"></i>인턴십</span><span><i class="dot color-장학금"></i>장학금</span><span><i class="dot color-학사"></i>학사</span><span><i class="dot color-행사"></i>행사</span></div><div class="importer"><label class="btn" for="detailFiles">공지 본문 HTML 가져오기</label><input id="detailFiles" type="file" accept=".html,.htm,text/html" multiple hidden><button class="btn" id="clearImported" type="button">추출 일정 초기화</button><span id="importStatus" class="hint" aria-live="polite"></span></div><p class="hint">날짜를 누르면 해당 날짜에 진행 중인 일정을 볼 수 있어요. 일정 바를 누르면 해당 일정이 선택됩니다.</p><div id="holidayStatus" role="status" aria-live="polite">대한민국 공휴일 불러오는 중…</div><div class="weekhead"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div id="calendar"></div></section><aside class="panel side"><h3 id="selectedTitle">날짜별 이벤트</h3><div id="eventList"></div><div class="section"><h3>실제 공지사항 <span id="noticeCount"></span></h3><input class="search" id="search" placeholder="공지 제목 검색" aria-label="공지 검색"><div class="notice-scroll" id="notices"></div></div></aside></div><p class="foot">출처: 중앙대학교 국제물류학과 공지사항. GitHub Actions가 갱신한 JSON을 불러옵니다. 선착순 모집 공지는 게시일에 표시될 수 있으며, 실제 신청 시작일을 의미하지 않습니다. 추출 결과는 원문에서 확인해 주세요.</p></main><script>
 let notices=[];
 // 게시판 목록 HTML에는 본문이 없으므로 날짜를 임의로 생성하지 않습니다.
@@ -144,12 +152,18 @@ function renderCalendar(){
   const todayDate=fmt(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
   if(!holidayByYear.has(shownYear))void loadHolidays(shownYear);
   for(let w=0;w<rows;w++){
-    const week=el('div','week week-cells');
+    const week=el('div','week week-cells span-week');
+    const weekStart=w*7-first+1;
+    const firstValid=Math.max(1,weekStart),lastValid=Math.min(last,weekStart+6);
+    const minDate=fmt(shownYear,shownMonth,firstValid);
+    const maxDate=fmt(shownYear,shownMonth,lastValid);
+    let hasHoliday=false;
     for(let d=0;d<7;d++){
-      const day=w*7+d-first+1;
+      const day=weekStart+d;
       const valid=day>=1&&day<=last;
       const date=valid?fmt(shownYear,shownMonth,day):null;
       const holidays=valid?getHoliday(date):[];
+      if(holidays.length)hasHoliday=true;
       const cell=el('div','calendar-cell'+(!valid?' out':'')+(d===0?' sunday':'')+(d===6?' saturday':'')+(holidays.length?' holiday':'')+(date===selected?' sel':'')+(date===todayDate?' today':''));
       if(valid){
         const dayButton=el('button','calendar-date',String(day));
@@ -157,18 +171,36 @@ function renderCalendar(){
         dayButton.onclick=()=>{selected=date;selectedEvent=null;renderCalendar();renderSide()};
         cell.append(dayButton);
         if(holidays.length){const label=el('div','holiday-name',holidays.join(' · '));label.title=holidays.join(', ');cell.append(label)}
-        const items=el('div','calendar-items');
-        for(const e of dayEvents(date)){
-          const bar=el('button','calendar-chip',e.title);
-          bar.type='button';bar.title=e.title;
-          bar.style.background=colors[e.category]||'#536e96';
-          bar.setAttribute('aria-label',e.title);
-          bar.onclick=()=>{selected=date;selectedEvent=e.id;renderCalendar();renderSide()};
-          items.append(bar);
-        }
-        cell.append(items);
       }
       week.append(cell);
+    }
+    // Each event is drawn ONCE per week, spanning its covered dates.
+    // Greedy lane assignment keeps overlapping ranges in separate rows.
+    const segments=active().filter(e=>e.start<=maxDate&&e.end>=minDate).map(e=>{
+      const start=e.start>minDate?e.start:minDate;
+      const end=e.end<maxDate?e.end:maxDate;
+      const startDay=Number(start.slice(8,10));
+      const endDay=Number(end.slice(8,10));
+      return {e,left:startDay-weekStart,right:endDay-weekStart};
+    }).sort((a,b)=>a.left-b.left||b.right-a.right||String(a.e.title).localeCompare(String(b.e.title)));
+    const lanes=[];
+    for(const seg of segments){
+      let lane=lanes.findIndex(right=>right<seg.left);
+      if(lane<0){lane=lanes.length;lanes.push(seg.right)}else lanes[lane]=seg.right;
+      seg.lane=lane;
+    }
+    const top=hasHoliday?57:37;
+    week.style.height=`${Math.max(56,top+lanes.length*27+7)}px`;
+    for(const seg of segments){
+      const bar=el('button','calendar-span',seg.e.title);
+      bar.type='button';bar.title=`${seg.e.title} (${seg.e.start} ~ ${seg.e.end})`;
+      bar.style.background=colors[seg.e.category]||'#536e96';
+      bar.style.left=`calc(${seg.left} * 100% / 7 + 2px)`;
+      bar.style.width=`calc(${seg.right-seg.left+1} * 100% / 7 - 4px)`;
+      bar.style.top=`${top+seg.lane*27}px`;
+      bar.setAttribute('aria-label',`${seg.e.title}, ${seg.e.start}부터 ${seg.e.end}까지`);
+      bar.onclick=()=>{selected=seg.e.start<minDate?minDate:seg.e.start;selectedEvent=seg.e.id;renderCalendar();renderSide()};
+      week.append(bar);
     }
     root.append(week);
   }
