@@ -1,0 +1,110 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CAU Logistics Calendar</title><style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,'Malgun Gothic',sans-serif;background:#0b1220;color:#e8efff}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid #ffe18a;outline-offset:2px}.shell{max-width:1320px;margin:auto;padding:28px 22px}.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}.brand{font-weight:800;font-size:22px}.sub{font-size:12px;color:#8ca2c0;margin-top:5px}.pill{background:#22334d;color:#a9d5fa;padding:8px 12px;border-radius:99px;font-size:12px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 325px;gap:18px}.panel{background:#151f31;border:1px solid #2c3c56;border-radius:17px;padding:20px;min-width:0}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:15px}.toolbar h2{margin:0;font-size:22px}.actions{display:flex;gap:7px;align-items:center}.btn{border:1px solid #40516d;background:#24334c;color:#f0f5ff;padding:8px 12px;border-radius:9px}.btn:hover{background:#344c70}.legend{display:flex;flex-wrap:wrap;gap:13px;margin-bottom:15px;font-size:12px;color:#bdcbe0}.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}.weekhead,.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.weekhead>div{text-align:center;color:#9cb0cd;font-size:12px;padding:10px 0}.week{border-top:1px solid #33445e;height:100%;align-items:stretch}.day{position:relative;min-height:0;height:100%;display:flex;align-items:flex-start;justify-content:flex-start;border-right:1px solid #33445e;background:#1a273b;padding:7px 5px;text-align:left;color:#dce7f8;border-top:0;border-bottom:0;border-left:0;min-width:0}.day:last-child{border-right:0}.day.out{opacity:.25}.day.sel{background:#2b3d59;box-shadow:inset 0 0 0 2px #e8bd55}.day .number{position:relative;z-index:3;display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 3px;border-radius:6px;background:#253650;color:#f4f8ff;font-size:13px;font-weight:800}.day.today .number{background:#c6a35b;color:#111827;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px}.weekwrap{position:relative}.bars{pointer-events:none;position:absolute;inset:37px 0 0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:22px;align-content:start;row-gap:4px}.bar{z-index:1;margin:0 2px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;display:block;border-radius:4px;font-size:11px;font-weight:650;color:white;pointer-events:auto;cursor:pointer;border:0;text-align:left;min-width:0}.bar:hover{filter:brightness(1.25)}.hint{font-size:12px;color:#a2b4cf;line-height:1.6}.event{display:block;width:100%;text-align:left;border:1px solid #354965;border-radius:11px;padding:13px;background:#1e2d44;color:#e8f1ff;margin:10px 0}.event:hover{background:#2c4260}.event small{display:block;color:#aabed9;margin-top:6px}.side h3{margin:0 0 8px}.section{margin-top:18px}.section h3{font-size:16px;margin:0 0 12px}.search{width:100%;border:1px solid #41516d;background:#0f192b;color:#fff;border-radius:9px;padding:11px}.notice{padding:12px 0;border-bottom:1px solid #2d3b52}.notice a{color:#e8efff;text-decoration:none;font-weight:600;font-size:13px;line-height:1.5}.notice a:hover{text-decoration:underline}.notice small{display:block;color:#9aacc6;margin-top:5px}.muted{color:#a8b8d0;font-size:13px;line-height:1.6}.notice-scroll{max-height:420px;overflow:auto}.importer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 13px}.importer label{cursor:pointer}.switch{display:flex;align-items:center;gap:8px;color:#d7e3f5;font-size:13px}.foot{margin-top:18px;font-size:12px;color:#8ca2c0}.color-인턴십{background:#97539e}.color-장학금{background:#148b9c}.color-학사{background:#3b72b9}.color-행사{background:#b18a2d}@media(max-width:950px){.layout{grid-template-columns:1fr}.shell{padding:14px}.panel{padding:12px}.day{min-height:0}.bars{inset:37px 0 0}.bar{font-size:10px;padding:4px;line-height:1.3}}@media(max-width:550px){.day{min-height:0}.bar{font-size:10px;padding:4px 3px;line-height:1.25}.toolbar h2{font-size:19px}}
+
+/* Compact calendar layout v3: week height controlled only by renderCalendar */
+#calendar .weekwrap { position:relative; height:56px; min-height:0; overflow:hidden; }
+#calendar .week { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); height:100%; min-height:0; align-items:stretch; }
+#calendar .day { position:relative; height:100%; min-height:0; padding:7px 5px; display:block; }
+#calendar .day .number { position:relative; z-index:5; display:inline-flex; align-items:center; justify-content:center; min-width:23px; height:23px; background:#263a55; border-radius:6px; color:#fff; font-weight:800; }
+#calendar .day.today .number { background:#c6a35b; color:#111827; border-radius:50%; }
+#calendar .bars { position:absolute; top:34px; right:0; bottom:auto; left:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); grid-auto-rows:22px; row-gap:4px; align-content:start; pointer-events:none; }
+#calendar .bars .bar { box-sizing:border-box; display:block; height:22px; max-height:22px; min-height:22px; width:auto; min-width:0; padding:3px 6px; margin:0 2px; border:0; border-radius:4px; font-size:11px; line-height:16px; font-weight:650; text-align:left; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; overflow-wrap:normal !important; word-break:normal !important; pointer-events:auto; }
+@media(max-width:550px) { #calendar .bars .bar {font-size:10px; padding:3px 4px;} }
+</style></head><body><main class="shell"><header class="header"><div><div class="brand">◈ CAU Logistics Calendar</div><div class="sub">중앙대학교 국제물류학과 · 공지사항 & 일정</div></div><span class="pill">2026.08 이후 공지 · GitHub 자동 업데이트 · UI v3</span></header><div class="layout"><section class="panel"><div class="toolbar"><h2 id="monthTitle"></h2><div class="actions"><button class="btn" id="prev">‹</button><button class="btn" id="today">이번 달</button><button class="btn" id="next">›</button></div></div><div class="legend"><span><i class="dot color-인턴십"></i>인턴십</span><span><i class="dot color-장학금"></i>장학금</span><span><i class="dot color-학사"></i>학사</span><span><i class="dot color-행사"></i>행사</span></div><div class="importer"><label class="btn" for="detailFiles">공지 본문 HTML 가져오기</label><input id="detailFiles" type="file" accept=".html,.htm,text/html" multiple hidden><button class="btn" id="clearImported" type="button">추출 일정 초기화</button><span id="importStatus" class="hint" aria-live="polite"></span></div><p class="hint">날짜를 누르면 해당 날짜에 진행 중인 일정을 볼 수 있어요. 일정 바를 누르면 해당 일정이 선택됩니다.</p><div class="weekhead"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div id="calendar"></div></section><aside class="panel side"><h3 id="selectedTitle">날짜별 이벤트</h3><div id="eventList"></div><div class="section"><h3>실제 공지사항 <span id="noticeCount"></span></h3><input class="search" id="search" placeholder="공지 제목 검색" aria-label="공지 검색"><div class="notice-scroll" id="notices"></div></div></aside></div><p class="foot">출처: 중앙대학교 국제물류학과 공지사항. GitHub Actions가 갱신한 JSON을 불러옵니다. 본문 HTML을 수동으로 가져올 수도 있습니다. 선착순 모집 공지는 게시일에 표시될 수 있으며, 실제 신청 시작일을 의미하지 않습니다. 추출 결과는 원문에서 확인해 주세요.</p></main><script>
+let notices=[];
+// 게시판 목록 HTML에는 본문이 없으므로 날짜를 임의로 생성하지 않습니다.
+// 상세 공지를 HTML로 저장해 가져오면 명시적인 신청/행사 날짜만 추출합니다.
+let actualEvents=[];
+const storageKey='cau-logistics-verified-events-v2';
+try {const saved=JSON.parse(localStorage.getItem(storageKey)||'[]');if(Array.isArray(saved)) actualEvents=saved.filter(e=>e&&e.start&&e.end&&e.url&&e.title)}catch(e){}
+const colors={'인턴십':'#97539e','장학금':'#148b9c','학사':'#3b72b9','행사':'#b18a2d'};
+let shownYear=2026,shownMonth=10,selected='2026-10-14',selectedEvent=null;
+const $=id=>document.getElementById(id);
+const fmt=(y,m,d)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const utc=s=>new Date(s+'T00:00:00Z');
+const shift=(s,n)=>{const d=utc(s);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+const active=()=>actualEvents;
+const dayEvents=date=>active().filter(e=>e.start<=date&&e.end>=date);
+function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n}
+function renderCalendar(){ $('monthTitle').textContent=`${shownYear}년 ${shownMonth}월`;const root=$('calendar');root.replaceChildren();const first=new Date(shownYear,shownMonth-1,1).getDay();const last=new Date(shownYear,shownMonth,0).getDate();const rows=Math.ceil((first+last)/7);const ev=active();for(let w=0;w<rows;w++){const wrap=el('div','weekwrap');const week=el('div','week');const dates=[];for(let d=0;d<7;d++){const day=w*7+d-first+1;const valid=day>=1&&day<=last;const date=valid?fmt(shownYear,shownMonth,day):null;dates.push(date);const b=el('button','day'+(!valid?' out':'')+(date===selected?' sel':'')+(date===new Date().toISOString().slice(0,10)?' today':''));b.type='button';b.disabled=!valid;b.setAttribute('aria-label',date||'다른 달');b.append(el('span','number',valid?String(day):''));if(valid)b.onclick=()=>{selected=date;selectedEvent=null;renderCalendar();renderSide()};week.append(b)}wrap.append(week);const bars=el('div','bars');let tracks=[];const rangeStart=dates.find(Boolean),rangeEnd=[...dates].reverse().find(Boolean);if(rangeStart){for(const e of ev){if(e.end<rangeStart||e.start>rangeEnd)continue;const firstCol=dates.findIndex(dt=>dt&&dt>=e.start&&dt<=e.end);let lastCol=-1;dates.forEach((dt,i)=>{if(dt&&dt>=e.start&&dt<=e.end)lastCol=i});if(firstCol<0||lastCol<0)continue;let track=0;while(tracks[track]?.some(([a,b])=>firstCol<=b&&lastCol>=a))track++;if(!tracks[track])tracks[track]=[];tracks[track].push([firstCol,lastCol]);const bar=el('button','bar',e.title);bar.type='button';bar.title=e.title+' ('+e.start+' ~ '+e.end+')';bar.setAttribute('aria-label',e.title+' / '+e.start+' ~ '+e.end);bar.style.background=colors[e.category]||'#536e96';bar.style.gridColumn=`${firstCol+1} / ${lastCol+2}`;bar.style.gridRow=String(track+1);bar.onclick=()=>{selected=dates[firstCol];selectedEvent=e.id;renderCalendar();renderSide()};bars.append(bar)}}wrap.append(bars);const h=tracks.length ? 40+tracks.length*26 : 56;wrap.style.height=h+'px';root.append(wrap)}}
+function renderSide(){const ev=dayEvents(selected);$('selectedTitle').textContent=`${selected.replaceAll('-','.')} 진행 중인 이벤트 (${ev.length})`;const box=$('eventList');box.replaceChildren();if(!ev.length){box.append(el('p','muted','선택한 날짜에 확인된 일정이 없습니다.'));return}for(const e of ev){const b=el('button','event');b.style.borderLeft=`5px solid ${colors[e.category]||'#718096'}`;b.append(el('strong','',e.title));b.append(el('small','',`${e.category} · ${e.start} ~ ${e.end}`));if(e.url){b.append(el('small','','원본 공지 열기 ↗'));b.onclick=()=>window.open(e.url,'_blank','noopener,noreferrer')}if(selectedEvent===e.id)b.style.background='#344a68';box.append(b)}}
+function renderNotices(){const q=$('search').value.trim().toLowerCase();const filtered=notices.filter(n=>n.title.toLowerCase().includes(q));$('noticeCount').textContent=`(${filtered.length})`;const root=$('notices');root.replaceChildren();for(const n of filtered){const row=el('div','notice');const a=el('a','',n.title+' ↗');a.href=n.url;a.target='_blank';a.rel='noopener noreferrer';row.append(a,el('small','',n.date+(n.attachment?' · 첨부파일 있음':'')));root.append(row)}if(!filtered.length)root.append(el('p','muted','검색 결과가 없습니다.'))}
+$('prev').onclick=()=>{shownMonth--;if(shownMonth<1){shownMonth=12;shownYear--}renderCalendar()};$('next').onclick=()=>{shownMonth++;if(shownMonth>12){shownMonth=1;shownYear++}renderCalendar()};$('today').onclick=()=>{const d=new Date();shownYear=d.getFullYear();shownMonth=d.getMonth()+1;selected=fmt(shownYear,shownMonth,d.getDate());renderCalendar();renderSide()};$('search').oninput=renderNotices;
+// 날짜 범위는 '신청기간: YYYY.MM.DD ~ YYYY.MM.DD'처럼 의미가 명시된 경우만 수집합니다.
+// 시작일과 종료일이 한 달에 걸쳐 달라도 동일한 한 개의 일정 바로 표시됩니다.
+function normalizeDate(y,m,d){const yy=+y,mm=+m,dd=+d;const x=new Date(Date.UTC(yy,mm-1,dd));if(x.getUTCFullYear()!==yy||x.getUTCMonth()+1!==mm||x.getUTCDate()!==dd)return null;return fmt(yy,mm,dd)}
+function categorize(title,label){const t=title+' '+label;if(/인턴|현장실습|채용|모집/.test(t))return '인턴십';if(/장학/.test(t))return '장학금';if(/수강|학점|등록|졸업|학사|시험/.test(t))return '학사';return '행사'}
+function findDateRanges(text){
+ const result=[];
+ const labelRe=/(신청\s*기간|접수\s*기간|지원\s*기간|모집\s*기간|제출\s*기간|참가\s*신청|행사\s*기간|개최\s*일시|행사\s*일시|진행\s*기간|면접\s*기간|운영\s*기간|신청\s*일정|접수\s*일정)\s*[:：]?\s*/g;
+ let match;
+ while((match=labelRe.exec(text))!==null){
+  const segment=text.slice(labelRe.lastIndex,labelRe.lastIndex+135).split(/[\n\r]/)[0];
+  const dates=[...segment.matchAll(/(20\d{2})[.\-/년]\s*(\d{1,2})[.\-/월]\s*(\d{1,2})\s*일?/g)];
+  if(!dates.length)continue;
+  const start=normalizeDate(...dates[0].slice(1,4));
+  if(!start)continue;
+  let end=start;
+  if(dates.length>1){
+   const between=segment.slice(dates[0].index+dates[0][0].length,dates[1].index);
+   if(!/[~～∼\-–—]|부터|까지/.test(between))continue;
+   end=normalizeDate(...dates[1].slice(1,4));
+  }else{
+   const tail=segment.slice(dates[0].index+dates[0][0].length);
+   const short=tail.match(/^\s*[~～∼\-–—]\s*(?:(\d{1,2})[.\-/월]\s*)?(\d{1,2})\s*일?/);
+   if(short)end=normalizeDate(dates[0][1],short[1]||dates[0][2],short[2]);
+  }
+  if(!end||end<start||utc(end)-utc(start)>1000*60*60*24*180)continue;
+  result.push({start,end,label:match[1],evidence:segment.slice(0,105)});
+ }
+ return result.filter((v,i,a)=>a.findIndex(x=>x.start===v.start&&x.end===v.end&&x.label===v.label)===i);
+}
+function getNoticeId(doc,filename){
+ const candidates=[doc.querySelector('input[name="p_idx"]')?.value||'',doc.querySelector('link[rel="canonical"]')?.href||'',doc.querySelector('meta[property="og:url"]')?.content||'',doc.querySelector('form[name="board_frm"] input[name="p_idx"]')?.value||'',filename];
+ for(const c of candidates){const m=String(c).match(/(?:p_idx[= _-]*|(?:^|[^0-9]))(\d{4})(?:\D|$)/);if(m&&notices.some(n=>n.id===m[1]))return m[1]}
+ const title=doc.querySelector('h3, .bo-view h4, .view-title, .bo_view h4')?.textContent?.trim();
+ if(title){const matches=notices.filter(n=>title.includes(n.title)||n.title.includes(title));if(matches.length===1)return matches[0].id}
+ return null;
+}
+function extractBody(doc){
+ for(const selector of ['.view-cont','.view_content','.board-view-content','.bo-view-content','.bo_view .content','.tb-view','.view_con','.board_view','.view_contents','.contents']){
+  const found=doc.querySelector(selector);if(found&&found.textContent.trim().length>20)return found.innerText||found.textContent;
+ }
+ // 상세 페이지의 본문 선택자가 불명확하면 페이지 전체에서 추출하지 않습니다.
+ return '';
+}
+$('detailFiles').addEventListener('change',async ev=>{
+ let matched=0,added=0,skipped=0;
+ for(const file of Array.from(ev.target.files||[])){
+  const doc=new DOMParser().parseFromString(await file.text(),'text/html');
+  const id=getNoticeId(doc,file.name);const notice=notices.find(n=>n.id===id);
+  if(!notice){skipped++;continue}
+  matched++;
+  const body=extractBody(doc);
+  if(!body){skipped++;continue}
+  for(const [i,r] of findDateRanges(body).entries()){
+   const event={id:`${id}-${r.start}-${r.end}-${i}`,title:notice.title+' · '+r.label,start:r.start,end:r.end,category:categorize(notice.title,r.label),url:notice.url,evidence:r.evidence};
+   if(!actualEvents.some(x=>x.id===event.id)){actualEvents.push(event);added++}
+  }
+ }
+ localStorage.setItem(storageKey,JSON.stringify(actualEvents));
+ $('importStatus').textContent=`일치한 상세 공지 ${matched}건 · 새 일정 ${added}건 · 본문 미확인 ${skipped}건`;
+ renderCalendar();renderSide();ev.target.value='';
+});
+$('clearImported').onclick=()=>{if(!confirm('가져온 일정 데이터를 모두 초기화할까요?'))return;actualEvents=[];localStorage.removeItem(storageKey);$('importStatus').textContent='일정 데이터를 초기화했습니다.';renderCalendar();renderSide()};
+async function loadPublishedData(){
+ try {
+  const [nr,er]=await Promise.all([fetch('./data/notices.json',{cache:'no-store'}),fetch('./data/events.json',{cache:'no-store'})]);
+  if(!nr.ok||!er.ok)throw new Error(`HTTP ${nr.status}/${er.status}`);
+  const [nn,ee]=await Promise.all([nr.json(),er.json()]);
+  if(!Array.isArray(nn)||!Array.isArray(ee))throw new Error('JSON 형식 오류');
+  notices=nn.filter(n=>n&&n.id&&n.title&&n.date&&n.url);
+  const imported=actualEvents;
+  actualEvents=ee.filter(e=>e&&e.start&&e.end&&e.url&&e.title);
+  for(const e of imported)if(!actualEvents.some(x=>x.id===e.id))actualEvents.push(e);
+  $('importStatus').textContent=`자동 수집 공지 ${notices.length}건 · 일정 ${ee.length}건`;
+ }catch(err){$('importStatus').textContent='자동 수집 데이터 로드 실패: '+err.message+' (GitHub Pages 주소에서 확인해 주세요)';}
+ renderCalendar();renderSide();renderNotices();
+}
+loadPublishedData();
+</script></body></html>
