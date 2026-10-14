@@ -1,1 +1,92 @@
-[]
+[
+  {
+    "id": "3759-2026-10-27-schedule-5",
+    "title": "인천항만",
+    "start": "2026-10-27",
+    "end": "2026-10-27",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3759&p_mode=view",
+    "notice_id": "3759",
+    "evidence": "- 인천항만: 10월 27일(화) 오후 2~4시 / 40명"
+  },
+  {
+    "id": "3759-2026-10-28-schedule-7",
+    "title": "LX판토스 자동화 창고(청라)",
+    "start": "2026-10-28",
+    "end": "2026-10-28",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3759&p_mode=view",
+    "notice_id": "3759",
+    "evidence": "- LX판토스 자동화 창고(청라): 10월 28일(수) 오후 1~3시 / 30명"
+  },
+  {
+    "id": "3759-2026-10-29-schedule-9",
+    "title": "페덱스 터미널(인천공항)",
+    "start": "2026-10-29",
+    "end": "2026-10-29",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3759&p_mode=view",
+    "notice_id": "3759",
+    "evidence": "- 페덱스 터미널(인천공항): 10월 29일(목) 오전 10시~낮 12시 / 20명"
+  },
+  {
+    "id": "3759-2026-10-29-schedule-11",
+    "title": "삼성SDS 컨트롤타워(판교)",
+    "start": "2026-10-29",
+    "end": "2026-10-29",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3759&p_mode=view",
+    "notice_id": "3759",
+    "evidence": "- 삼성SDS 컨트롤타워(판교): 10월 29일(목) / 모집 인원 및 방문 시간 추후 확정"
+  },
+  {
+    "id": "3759-2026-10-30-schedule-13",
+    "title": "로지스틱스학회 추계학술대회(대한상공회의소)",
+    "start": "2026-10-30",
+    "end": "2026-10-30",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3759&p_mode=view",
+    "notice_id": "3759",
+    "evidence": "- 로지스틱스학회 추계학술대회(대한상공회의소): 10월 30일(금)"
+  },
+  {
+    "id": "3742-2026-09-01-2026-09-01-1423",
+    "title": "2026-2학기 학점등록 안내(2026.08.19) · 신청기간",
+    "start": "2026-09-01",
+    "end": "2026-09-01",
+    "category": "학사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3742&p_mode=view",
+    "notice_id": "3742",
+    "evidence": "신청기간: 2026. 9. 1.(화) ~"
+  },
+  {
+    "id": "3746-2026-09-08-2026-09-15-87",
+    "title": "2026학년도 2학기 국제물류학과 멘토링 모집공고 · 신청기간",
+    "start": "2026-09-08",
+    "end": "2026-09-15",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3746&p_mode=view",
+    "notice_id": "3746",
+    "evidence": "신청기간: 2026년 9월8일 - 9월15일 오후1시까지"
+  },
+  {
+    "id": "3743-2026-08-26-2026-08-26-350",
+    "title": "2026 삼성전자로지텍 주관 전국 대학생 물류경진대회 참가팀 모집(~ 8/26) · 신청 기간",
+    "start": "2026-08-26",
+    "end": "2026-08-26",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3743&p_mode=view",
+    "notice_id": "3743",
+    "evidence": "신청 기간: ~ 2026. 8. 26.(수) 23:59까지"
+  },
+  {
+    "id": "3739-2026-07-13-2026-08-18-463",
+    "title": "[HIMUN] 제50차 모의유엔 총회 사전관람 신청 · 신청 기간",
+    "start": "2026-07-13",
+    "end": "2026-08-18",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3739&p_mode=view",
+    "notice_id": "3739",
+    "evidence": "신청 기간: 2026.07.13.(MON) - 2026.08.18(TUE)"
+  }
+]
