@@ -19,7 +19,7 @@ HEADERS = {'User-Agent': 'CAU-Logistics-Calendar/1.1 (public notice index; low-f
 ID_RE = re.compile(r"view\(['\"](\d+)['\"]")
 DATE_RE = re.compile(r'^(20\d{2})[./-](\d{1,2})[./-](\d{1,2})$')
 FULL = r'(20\d{2})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})\s*일?'
-LABEL = re.compile(r'(신청\s*기간|접수\s*기간|지원\s*기간|모집\s*기간|제출\s*기간|행사\s*기간|진행\s*기간|운영\s*기간|신청\s*마감|접수\s*마감|행사\s*일시|개최\s*일시)\s*[:：]?\s*')
+LABEL = re.compile(r'(신청\s*기간|접수\s*기간|지원\s*기간|모집\s*기간|제출\s*기간|행사\s*기간|진행\s*기간|운영\s*기간|신청\s*시작|접수\s*시작|모집\s*시작|신청\s*마감|접수\s*마감|행사\s*일시|개최\s*일시)\s*[:：]?\s*')
 
 
 def iso(y, m, d):
@@ -114,6 +114,22 @@ def extract_events(body, notice):
                  'evidence': combined[:130]}
         if not any(e['title'] == name and e['start'] == day for e in events):
             events.append(event)
+    # A first-come-first-served notice with no explicit application dates:
+    # show its publication date as an announcement, NOT an application start date.
+    # Never infer a deadline from the event date or the publication date.
+    if (re.search(r'선착순', body) and re.search(r'신청|모집|접수', body)
+            and not any(re.search(r'신청\s*기간|접수\s*기간|모집\s*기간|신청\s*시작|접수\s*시작',
+                                  e.get('title', '')) for e in events)):
+        published = notice['date']
+        if re.fullmatch(r'20\d{2}-\d{2}-\d{2}', published):
+            events.append({
+                'id': f"{notice['id']}-firstcome-announcement",
+                'title': notice['title'] + ' · 선착순 모집 공지 (신청 시작일 미확인)',
+                'start': published, 'end': published,
+                'category': '행사', 'url': notice['url'],
+                'notice_id': notice['id'],
+                'evidence': '본문에 선착순 모집/신청 표현 확인. 표시 날짜는 신청 시작일이 아닌 공지 게시일.',
+            })
     return events
 
 
