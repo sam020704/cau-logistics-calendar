@@ -23,7 +23,49 @@
 #calendar .calendar-chip {display:block;box-sizing:border-box;width:100%;min-width:0;height:24px;max-height:24px;flex:none;padding:4px 6px;border:0;border-radius:4px;text-align:left;color:#fff;font-size:11px;font-weight:650;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
 #calendar .calendar-chip:hover {filter:brightness(1.2)}
 @media(max-width:550px){#calendar .calendar-cell{padding:5px 2px 6px;gap:5px}#calendar .calendar-chip{font-size:9px;padding:4px 3px;height:23px}#calendar .calendar-date{font-size:12px;min-width:22px;height:22px;padding:0 3px}}
-</style></head><body><main class="shell"><header class="header"><div><div class="brand">◈ CAU Logistics Calendar</div><div class="sub">중앙대학교 국제물류학과 · 공지사항 & 일정</div></div><span class="pill">2026.08 이후 공지 · GitHub 자동 업데이트 · UI v4</span></header><div class="layout"><section class="panel"><div class="toolbar"><h2 id="monthTitle"></h2><div class="actions"><button class="btn" id="prev">‹</button><button class="btn" id="today">이번 달</button><button class="btn" id="next">›</button></div></div><div class="legend"><span><i class="dot color-인턴십"></i>인턴십</span><span><i class="dot color-장학금"></i>장학금</span><span><i class="dot color-학사"></i>학사</span><span><i class="dot color-행사"></i>행사</span></div><div class="importer"><label class="btn" for="detailFiles">공지 본문 HTML 가져오기</label><input id="detailFiles" type="file" accept=".html,.htm,text/html" multiple hidden><button class="btn" id="clearImported" type="button">추출 일정 초기화</button><span id="importStatus" class="hint" aria-live="polite"></span></div><p class="hint">날짜를 누르면 해당 날짜에 진행 중인 일정을 볼 수 있어요. 일정 바를 누르면 해당 일정이 선택됩니다.</p><div class="weekhead"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div id="calendar"></div></section><aside class="panel side"><h3 id="selectedTitle">날짜별 이벤트</h3><div id="eventList"></div><div class="section"><h3>실제 공지사항 <span id="noticeCount"></span></h3><input class="search" id="search" placeholder="공지 제목 검색" aria-label="공지 검색"><div class="notice-scroll" id="notices"></div></div></aside></div><p class="foot">출처: 중앙대학교 국제물류학과 공지사항. GitHub Actions가 갱신한 JSON을 불러옵니다. 본문 HTML을 수동으로 가져올 수도 있습니다. 선착순 모집 공지는 게시일에 표시될 수 있으며, 실제 신청 시작일을 의미하지 않습니다. 추출 결과는 원문에서 확인해 주세요.</p></main><script>
+
+/* White theme and Korean public holidays (UI v5) */
+:root{color-scheme:light;background:#f6f8fc;color:#192538}
+body{background:#f6f8fc;color:#192538}
+.header .brand{color:#17243a}.sub{color:#64748b}
+.pill{background:#e8f1ff;color:#2255a2}
+.panel{background:#fff;border-color:#dce3ed;box-shadow:0 4px 18px rgba(20,42,70,.04)}
+.toolbar h2,.side h3,.section h3{color:#1c2d46}
+.btn{background:#fff;border-color:#ccd7e6;color:#243b5b}
+.btn:hover{background:#eef4fc}
+.legend,.hint,.muted,.foot{color:#65758d}
+.weekhead>div{color:#465a76}
+.weekhead>div:first-child{color:#d63d4b}
+.weekhead>div:last-child{color:#2563c7}
+#calendar .week-cells{border-top-color:#dce3ed}
+#calendar .calendar-cell{background:#fff;border-right-color:#e0e7f0}
+#calendar .calendar-cell.out{background:#f8fafd}
+#calendar .calendar-cell.sel{background:#edf4ff;box-shadow:inset 0 0 0 2px #5a8dea}
+#calendar .calendar-date{background:transparent;color:#1f2d43;border-radius:5px;min-width:24px;height:24px;padding:0 3px;cursor:pointer}
+#calendar .calendar-cell.sunday .calendar-date,#calendar .calendar-cell.holiday .calendar-date{color:#d53645}
+#calendar .calendar-cell.saturday:not(.holiday) .calendar-date{color:#2164c4}
+#calendar .calendar-cell.today .calendar-date{background:#f5cf69;color:#1d2939;border-radius:7px}
+#calendar .calendar-cell.today.holiday .calendar-date{color:#b42332}
+#calendar .calendar-cell.today.saturday:not(.holiday) .calendar-date{color:#1751a5}
+#calendar .calendar-cell{gap:3px;padding:5px 5px 7px;min-height:56px}
+#calendar .calendar-items{gap:4px;margin-top:3px}
+#calendar .holiday-name{font-size:10px;line-height:1.25;color:#d53645;font-weight:650;overflow-wrap:anywhere;white-space:normal;margin:0 1px 1px}
+#calendar .calendar-chip{height:24px;max-height:24px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+#calendar .calendar-cell.out .calendar-date{visibility:hidden}
+.event{background:#f8faff;color:#21334c;border-color:#dbe3ee}
+.event:hover{background:#edf4ff}
+.event small{color:#667992}
+.notice{border-bottom-color:#e3e9f1}
+.notice a{color:#24364e}
+.notice small{color:#738399}
+.search{background:#fff;color:#1b2b40;border-color:#cbd7e6}
+.search::placeholder{color:#8b99ac}
+.importer{display:none!important}
+#holidayStatus{font-size:11px;color:#64748b;margin-left:auto}
+#holidayStatus.error{color:#ad3944}
+.holiday-summary{font-size:12px;color:#c53545;font-weight:650;margin:5px 0 10px}
+@media(max-width:550px){#calendar .calendar-cell{padding:4px 2px 6px;gap:2px}#calendar .holiday-name{font-size:9px}#calendar .calendar-chip{font-size:9px}}
+</style></head><body><main class="shell"><header class="header"><div><div class="brand">◈ CAU Logistics Calendar</div><div class="sub">중앙대학교 국제물류학과 · 공지사항 & 일정</div></div><span class="pill">2026.08 이후 공지 · GitHub 자동 업데이트 · UI v5</span></header><div class="layout"><section class="panel"><div class="toolbar"><h2 id="monthTitle"></h2><div class="actions"><button class="btn" id="prev">‹</button><button class="btn" id="today">이번 달</button><button class="btn" id="next">›</button></div></div><div class="legend"><span><i class="dot color-인턴십"></i>인턴십</span><span><i class="dot color-장학금"></i>장학금</span><span><i class="dot color-학사"></i>학사</span><span><i class="dot color-행사"></i>행사</span></div><div class="importer"><label class="btn" for="detailFiles">공지 본문 HTML 가져오기</label><input id="detailFiles" type="file" accept=".html,.htm,text/html" multiple hidden><button class="btn" id="clearImported" type="button">추출 일정 초기화</button><span id="importStatus" class="hint" aria-live="polite"></span></div><p class="hint">날짜를 누르면 해당 날짜에 진행 중인 일정을 볼 수 있어요. 일정 바를 누르면 해당 일정이 선택됩니다.</p><div id="holidayStatus" role="status" aria-live="polite">대한민국 공휴일 불러오는 중…</div><div class="weekhead"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div id="calendar"></div></section><aside class="panel side"><h3 id="selectedTitle">날짜별 이벤트</h3><div id="eventList"></div><div class="section"><h3>실제 공지사항 <span id="noticeCount"></span></h3><input class="search" id="search" placeholder="공지 제목 검색" aria-label="공지 검색"><div class="notice-scroll" id="notices"></div></div></aside></div><p class="foot">출처: 중앙대학교 국제물류학과 공지사항. GitHub Actions가 갱신한 JSON을 불러옵니다. 선착순 모집 공지는 게시일에 표시될 수 있으며, 실제 신청 시작일을 의미하지 않습니다. 추출 결과는 원문에서 확인해 주세요.</p></main><script>
 let notices=[];
 // 게시판 목록 HTML에는 본문이 없으므로 날짜를 임의로 생성하지 않습니다.
 // 상세 공지를 HTML로 저장해 가져오면 명시적인 신청/행사 날짜만 추출합니다.
@@ -36,6 +78,60 @@ const $=id=>document.getElementById(id);
 const fmt=(y,m,d)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 const utc=s=>new Date(s+'T00:00:00Z');
 const shift=(s,n)=>{const d=utc(s);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+// Public holiday source: Nager.Date, KR. Holidays may omit temporary/special Korean government announcements.
+const holidayByYear=new Map();
+const holidayLoading=new Map();
+const holidayNames={
+  "New Year's Day":"신정","Seollal":"설날","Korean New Year":"설날",
+  "Independence Movement Day":"삼일절","March 1st Movement Day":"삼일절",
+  "Children's Day":"어린이날","Buddha's Birthday":"부처님오신날",
+  "Memorial Day":"현충일","Liberation Day":"광복절",
+  "Chuseok":"추석","National Foundation Day":"개천절",
+  "Hangul Day":"한글날","Hangeul Day":"한글날",
+  "Christmas Day":"성탄절","Christmas":"성탄절",
+  "Election Day":"선거일"
+};
+function koreanHolidayName(h){
+  const name=String(h.localName||'').trim();
+  if(/[가-힣]/.test(name))return name;
+  const eng=String(h.name||name);
+  if(/substitute|alternative|observed/i.test(eng)){
+    const base=eng.replace(/substitute|alternative|observed|holiday/gi,'').trim();
+    return (holidayNames[base]||base||'대체공휴일')+' (대체공휴일)';
+  }
+  return holidayNames[eng]||name||eng;
+}
+function getHoliday(date){return holidayByYear.get(Number(date.slice(0,4)))?.get(date)||[]}
+async function loadHolidays(year){
+  if(holidayByYear.has(year))return;
+  if(holidayLoading.has(year))return holidayLoading.get(year);
+  const task=(async()=>{
+    const status=$('holidayStatus');
+    status.textContent=`${year}년 대한민국 공휴일 확인 중…`;
+    status.classList.remove('error');
+    try{
+      const response=await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/KR`);
+      if(!response.ok)throw new Error(`HTTP ${response.status}`);
+      const list=await response.json();
+      if(!Array.isArray(list))throw new Error('공휴일 응답 형식 오류');
+      const map=new Map();
+      for(const h of list){
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(h.date||''))continue;
+        if(Array.isArray(h.types)&&!h.types.includes('Public'))continue;
+        const name=koreanHolidayName(h);
+        const names=map.get(h.date)||[];
+        if(!names.includes(name))names.push(name);
+        map.set(h.date,names);
+      }
+      holidayByYear.set(year,map);
+      if(shownYear===year){status.textContent='대한민국 공휴일 표시 중 · 임시공휴일 등은 원문 확인';renderCalendar();renderSide()}
+    }catch(error){
+      if(shownYear===year){status.textContent='공휴일 정보를 불러오지 못했어요 · 인터넷 연결 확인';status.classList.add('error')}
+    }finally{holidayLoading.delete(year)}
+  })();
+  holidayLoading.set(year,task);
+  return task;
+}
 const active=()=>actualEvents;
 const dayEvents=date=>active().filter(e=>e.start<=date&&e.end>=date);
 function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n}
@@ -46,18 +142,21 @@ function renderCalendar(){
   const last=new Date(shownYear,shownMonth,0).getDate();
   const rows=Math.ceil((first+last)/7);
   const todayDate=fmt(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  if(!holidayByYear.has(shownYear))void loadHolidays(shownYear);
   for(let w=0;w<rows;w++){
     const week=el('div','week week-cells');
     for(let d=0;d<7;d++){
       const day=w*7+d-first+1;
       const valid=day>=1&&day<=last;
       const date=valid?fmt(shownYear,shownMonth,day):null;
-      const cell=el('div','calendar-cell'+(!valid?' out':'')+(date===selected?' sel':'')+(date===todayDate?' today':''));
+      const holidays=valid?getHoliday(date):[];
+      const cell=el('div','calendar-cell'+(!valid?' out':'')+(d===0?' sunday':'')+(d===6?' saturday':'')+(holidays.length?' holiday':'')+(date===selected?' sel':'')+(date===todayDate?' today':''));
       if(valid){
         const dayButton=el('button','calendar-date',String(day));
-        dayButton.type='button';dayButton.setAttribute('aria-label',date+' 일정 보기');
+        dayButton.type='button';dayButton.setAttribute('aria-label',date+(holidays.length?' '+holidays.join(', '):'')+' 일정 보기');
         dayButton.onclick=()=>{selected=date;selectedEvent=null;renderCalendar();renderSide()};
         cell.append(dayButton);
+        if(holidays.length){const label=el('div','holiday-name',holidays.join(' · '));label.title=holidays.join(', ');cell.append(label)}
         const items=el('div','calendar-items');
         for(const e of dayEvents(date)){
           const bar=el('button','calendar-chip',e.title);
@@ -74,7 +173,7 @@ function renderCalendar(){
     root.append(week);
   }
 }
-function renderSide(){const ev=dayEvents(selected);$('selectedTitle').textContent=`${selected.replaceAll('-','.')} 진행 중인 이벤트 (${ev.length})`;const box=$('eventList');box.replaceChildren();if(!ev.length){box.append(el('p','muted','선택한 날짜에 확인된 일정이 없습니다.'));return}for(const e of ev){const b=el('button','event');b.style.borderLeft=`5px solid ${colors[e.category]||'#718096'}`;b.append(el('strong','',e.title));b.append(el('small','',`${e.category} · ${e.start} ~ ${e.end}`));if(e.url){b.append(el('small','','원본 공지 열기 ↗'));b.onclick=()=>window.open(e.url,'_blank','noopener,noreferrer')}if(selectedEvent===e.id)b.style.background='#344a68';box.append(b)}}
+function renderSide(){const ev=dayEvents(selected);const holidayNamesForDay=getHoliday(selected);$('selectedTitle').textContent=`${selected.replaceAll('-','.')} 진행 중인 이벤트 (${ev.length})`;const box=$('eventList');box.replaceChildren();if(holidayNamesForDay.length)box.append(el('div','holiday-summary','공휴일 · '+holidayNamesForDay.join(' · ')));if(!ev.length){box.append(el('p','muted','선택한 날짜에 확인된 일정이 없습니다.'));return}for(const e of ev){const b=el('button','event');b.style.borderLeft=`5px solid ${colors[e.category]||'#718096'}`;b.append(el('strong','',e.title));b.append(el('small','',`${e.category} · ${e.start} ~ ${e.end}`));if(e.url){b.append(el('small','','원본 공지 열기 ↗'));b.onclick=()=>window.open(e.url,'_blank','noopener,noreferrer')}if(selectedEvent===e.id)b.style.background='#344a68';box.append(b)}}
 function renderNotices(){const q=$('search').value.trim().toLowerCase();const filtered=notices.filter(n=>n.title.toLowerCase().includes(q));$('noticeCount').textContent=`(${filtered.length})`;const root=$('notices');root.replaceChildren();for(const n of filtered){const row=el('div','notice');const a=el('a','',n.title+' ↗');a.href=n.url;a.target='_blank';a.rel='noopener noreferrer';row.append(a,el('small','',n.date+(n.attachment?' · 첨부파일 있음':'')));root.append(row)}if(!filtered.length)root.append(el('p','muted','검색 결과가 없습니다.'))}
 $('prev').onclick=()=>{shownMonth--;if(shownMonth<1){shownMonth=12;shownYear--}renderCalendar()};$('next').onclick=()=>{shownMonth++;if(shownMonth>12){shownMonth=1;shownYear++}renderCalendar()};$('today').onclick=()=>{const d=new Date();shownYear=d.getFullYear();shownMonth=d.getMonth()+1;selected=fmt(shownYear,shownMonth,d.getDate());renderCalendar();renderSide()};$('search').oninput=renderNotices;
 // 날짜 범위는 '신청기간: YYYY.MM.DD ~ YYYY.MM.DD'처럼 의미가 명시된 경우만 수집합니다.
@@ -154,13 +253,4 @@ async function loadPublishedData(){
  renderCalendar();renderSide();renderNotices();
 }
 loadPublishedData();
-</script>
-
-<style>
-  .importer {
-    display: none !important;
-  }
-</style>
-
-</body>
-</html>
+</script></body></html>
