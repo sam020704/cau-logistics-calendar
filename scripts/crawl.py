@@ -83,6 +83,35 @@ def extract_events(body, notice):
                  'notice_id': notice['id'], 'evidence': label.group(1) + ': ' + segment[:100]}
         if not any(e['start'] == start and e['end'] == end and e['title'] == event['title'] for e in events):
             events.append(event)
+    # A heading followed by individually dated visits/events (e.g. "견학 및 행사 일정").
+    lines = [x.strip() for x in body.splitlines() if x.strip()]
+    in_schedule = False
+    for i, line in enumerate(lines):
+        if re.search(r'견학\s*및\s*행사\s*일정|행사\s*일정', line) and len(line) < 45:
+            in_schedule = True
+            continue
+        if in_schedule and re.match(r'^<[^>]+>$', line):
+            in_schedule = False
+        if not in_schedule or not line.startswith('- '):
+            continue
+        # HTML line breaks may split the event name and its date.
+        combined = line + (' ' + lines[i+1] if i+1 < len(lines) else '')
+        match = re.search(r'(\d{1,2})\s*월\s*(\d{1,2})\s*일', combined)
+        if not match:
+            continue
+        year = int(notice['date'][:4])
+        day = iso(year, *match.groups())
+        if not day:
+            continue
+        name = line[2:].rstrip(':：').strip()
+        if not name:
+            continue
+        event = {'id': f"{notice['id']}-{day}-schedule-{i}",
+                 'title': name, 'start': day, 'end': day, 'category': '행사',
+                 'url': notice['url'], 'notice_id': notice['id'],
+                 'evidence': combined[:130]}
+        if not any(e['title'] == name and e['start'] == day for e in events):
+            events.append(event)
     return events
 
 
@@ -107,7 +136,7 @@ def detail_text(html, expected_id):
     # Do not mistake a returned list page for a detail page.
     if soup.select_one('table.tb3 tbody tr'):
         raise RuntimeError(f'{expected_id}: 상세 요청이 목록 페이지를 반환했습니다. view() 함수 확인 필요')
-    for selector in ['.view-cont', '.view_content', '.board-view-content', '.bo-view-content',
+    for selector in ['#bo-cont', '.view-cont', '.view_content', '.board-view-content', '.bo-view-content',
                      '.bo_view .content', '.tb-view', '.view_con', '.board_view', '.view_contents', '.contents']:
         node = soup.select_one(selector)
         if node and len(node.get_text(' ', strip=True)) > 20:
@@ -160,7 +189,13 @@ def crawl(max_pages=30, delay=1.5):
     for i, notice in enumerate(all_notices.values()):
         # POST with p_mode=view is a hypothesis based on form fields; fail closed on mismatch.
         try:
-            detail = request_page(session, fields, p_idx=notice['id'], p_mode='view')
+            # The saved official detail page uses GET query parameters, not POST.
+            params = dict(fields)
+            params.update(p_idx=notice['id'], p_mode='view')
+            response = session.get(BASE, params=params, timeout=25)
+            response.raise_for_status()
+            response.encoding = response.apparent_encoding or 'utf-8'
+            detail = response.text
             body = detail_text(detail, notice['id'])
             for event in extract_events(body, notice):
                 all_events[event['id']] = event
