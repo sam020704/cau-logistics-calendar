@@ -1,5 +1,15 @@
 [
   {
+    "id": "3763-firstcome-announcement",
+    "title": "물류현장 견학주간 참가자 명단 안내 · 선착순 모집 공지 (신청 시작일 미확인)",
+    "start": "2026-10-14",
+    "end": "2026-10-14",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3763&p_mode=view",
+    "notice_id": "3763",
+    "evidence": "본문에 선착순 모집/신청 표현 확인. 표시 날짜는 신청 시작일이 아닌 공지 게시일."
+  },
+  {
     "id": "3759-2026-10-27-schedule-5",
     "title": "인천항만",
     "start": "2026-10-27",
@@ -48,6 +58,16 @@
     "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3759&p_mode=view",
     "notice_id": "3759",
     "evidence": "- 로지스틱스학회 추계학술대회(대한상공회의소): 10월 30일(금)"
+  },
+  {
+    "id": "3759-firstcome-announcement",
+    "title": "국제물류학과 물류현장 견학주간 참가자 모집 · 선착순 모집 공지 (신청 시작일 미확인)",
+    "start": "2026-10-07",
+    "end": "2026-10-07",
+    "category": "행사",
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3759&p_mode=view",
+    "notice_id": "3759",
+    "evidence": "본문에 선착순 모집/신청 표현 확인. 표시 날짜는 신청 시작일이 아닌 공지 게시일."
   },
   {
     "id": "3757-2026-10-02-2026-10-02-530",
