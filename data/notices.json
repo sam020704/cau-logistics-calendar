@@ -1,10 +1,25 @@
 [
   {
+    "id": "3764",
+    "title": "국제물류학과 현장견학 주간 수업 및 출석 인정 안내",
+    "date": "2026-10-15",
+    "attachment": false,
+    "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3764&p_mode=view"
+  },
+  {
     "id": "3763",
     "title": "물류현장 견학주간 참가자 명단 안내",
     "date": "2026-10-14",
     "attachment": true,
     "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3763&p_mode=view"
+  },
+  {
+    "id": "jobs-3760",
+    "title": "큐니티 서플라이체인 인턴 모집",
+    "date": "2026-10-13",
+    "attachment": false,
+    "url": "https://log.cau.ac.kr/dm/dm_2.php?p_idx=3760&p_mode=view",
+    "source": "채용공고"
   },
   {
     "id": "3761",
@@ -15,7 +30,7 @@
   },
   {
     "id": "3759",
-    "title": "국제물류학과 물류현장 견학주간 참가자 모집",
+    "title": "[마감] 국제물류학과 물류현장 견학주간 참가자 모집",
     "date": "2026-10-07",
     "attachment": false,
     "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3759&p_mode=view"
@@ -117,6 +132,14 @@
     "date": "2026-08-12",
     "attachment": true,
     "url": "https://log.cau.ac.kr/dm/dm_1.php?p_idx=3742&p_mode=view"
+  },
+  {
+    "id": "jobs-3741",
+    "title": "[인턴십사업단] 인스브룩크 인턴십 모집 공고 (모집기간 변경)",
+    "date": "2026-08-10",
+    "attachment": true,
+    "url": "https://log.cau.ac.kr/dm/dm_2.php?p_idx=3741&p_mode=view",
+    "source": "채용공고"
   },
   {
     "id": "3740",
