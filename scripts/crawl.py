@@ -54,8 +54,22 @@ def parse_list(html):
     return results, soup
 
 
+def student_council_notice(body, notice):
+    """Classify notices explicitly connected to the student council."""
+    title = notice.get('title', '')
+    if re.search(r'학생\s*회|학생자치', title):
+        return True
+    # Require a leadership/organizer context in the body, not just an incidental mention.
+    return bool(re.search(
+        r'(?:주최|주관|운영|담당|문의)\s*[:：]?\s*[^\n]{0,45}?(?:학생\s*회|학생자치)'
+        r'|(?:학생\s*회|학생자치)[^\n]{0,35}?(?:주최|주관|운영|주최합니다|주관합니다)',
+        body
+    ))
+
+
 def extract_events(body, notice):
     events = []
+    council = student_council_notice(body, notice)
     for label in LABEL.finditer(body):
         segment = body[label.end():label.end()+145].split('\n')[0]
         dates = list(re.finditer(FULL, segment))
@@ -78,7 +92,7 @@ def extract_events(body, notice):
         if not end or end < start or (date.fromisoformat(end)-date.fromisoformat(start)).days > 180:
             continue
         text = notice['title'] + ' ' + label.group(1)
-        category = ('장학금' if '장학' in text else '인턴십' if re.search('인턴|현장실습|채용', text)
+        category = ('학생회' if council else '장학금' if '장학' in text else '인턴십' if re.search('인턴|현장실습|채용', text)
                     else '학사' if re.search('수강|학점|등록|졸업|학사', text) else '행사')
         event = {'id': f"{notice['id']}-{start}-{end}-{label.start()}", 'title': notice['title'] + ' · ' + label.group(1),
                  'start': start, 'end': end, 'category': category, 'url': notice['url'],
@@ -109,7 +123,7 @@ def extract_events(body, notice):
         if not name:
             continue
         event = {'id': f"{notice['id']}-{day}-schedule-{i}",
-                 'title': name, 'start': day, 'end': day, 'category': '행사',
+                 'title': name, 'start': day, 'end': day, 'category': '학생회' if council else '행사',
                  'url': notice['url'], 'notice_id': notice['id'],
                  'evidence': combined[:130]}
         if not any(e['title'] == name and e['start'] == day for e in events):
@@ -126,7 +140,7 @@ def extract_events(body, notice):
                 'id': f"{notice['id']}-firstcome-announcement",
                 'title': notice['title'] + ' · 선착순 모집 공지 (신청 시작일 미확인)',
                 'start': published, 'end': published,
-                'category': '행사', 'url': notice['url'],
+                'category': '학생회' if council else '행사', 'url': notice['url'],
                 'notice_id': notice['id'],
                 'evidence': '본문에 선착순 모집/신청 표현 확인. 표시 날짜는 신청 시작일이 아닌 공지 게시일.',
             })
@@ -239,6 +253,8 @@ def crawl(max_pages=30, delay=3.0):
             # Preserve previously verified events when detail temporarily fails.
             for event in old_events.values():
                 if event.get('notice_id') == notice['id']:
+                    if student_council_notice('', notice):
+                        event = {**event, 'category': '학생회'}
                     all_events[event['id']] = event
                     restored_events += 1
         time.sleep(delay)
