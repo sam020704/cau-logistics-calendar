@@ -13,6 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 
 BASE = 'https://log.cau.ac.kr/dm/dm_1.php'
+JOBS_BASE = 'https://log.cau.ac.kr/dm/dm_2.php'
 ROOT = Path(__file__).resolve().parents[1]
 CUTOFF = date(2026, 8, 1)
 HEADERS = {'User-Agent': 'CAU-Logistics-Calendar/1.1 (public notice index; low-frequency)'}
@@ -29,7 +30,7 @@ def iso(y, m, d):
         return None
 
 
-def parse_list(html):
+def parse_list(html, base=BASE):
     soup = BeautifulSoup(html, 'html.parser')
     table = soup.select_one('table.tb3')
     if not table or not table.select_one('tbody'):
@@ -50,7 +51,7 @@ def parse_list(html):
         if published and published >= CUTOFF.isoformat():
             results.append({'id': match.group(1), 'title': a.get_text(' ', strip=True),
                             'date': published, 'attachment': bool(cells[2].find('img')),
-                            'url': BASE + '?' + urlencode({'p_idx': match.group(1), 'p_mode': 'view'})})
+                            'url': base + '?' + urlencode({'p_idx': match.group(1), 'p_mode': 'view'})})
     return results, soup
 
 
@@ -154,10 +155,10 @@ def fields_from_form(soup):
     return {x.get('name'): x.get('value', '') for x in form.select('input[name]')}
 
 
-def request_page(session, fields, **overrides):
+def request_page(session, fields, base=BASE, **overrides):
     data = dict(fields)
     data.update(overrides)
-    r = session.post(BASE, data=data, timeout=25)
+    r = session.post(base, data=data, timeout=25)
     r.raise_for_status()
     r.encoding = r.apparent_encoding or 'utf-8'
     return r.text
@@ -176,7 +177,7 @@ def detail_text(html, expected_id):
     raise RuntimeError(f'{expected_id}: 상세 본문 선택자 미확인. HTML 구조를 확인해 주세요')
 
 
-def crawl(max_pages=30, delay=3.0):
+def crawl_board(max_pages=30, delay=3.0, base=BASE, jobs=False):
     session = requests.Session()
     session.headers.update(HEADERS)
     # A single bounded retry; do not hammer a server that refuses connections.
@@ -191,22 +192,22 @@ def crawl(max_pages=30, delay=3.0):
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('https://', adapter)
     session.mount('http://', adapter)
-    response = session.get(BASE, timeout=25)
+    response = session.get(base, timeout=25)
     response.raise_for_status()
     response.encoding = response.apparent_encoding or 'utf-8'
     initial = response.text
-    first_entries, soup = parse_list(initial)
+    first_entries, soup = parse_list(initial, base)
     if not first_entries:
-        raise RuntimeError('첫 페이지에 2026-08 이후 공지가 없습니다')
+        raise RuntimeError(f'{base}: 첫 페이지에 2026-08 이후 공지가 없습니다')
     fields = fields_from_form(soup)
     all_notices = {}
     all_events = {}
-    old_notices = {n['id']: n for n in load('notices.json')}
-    old_events = {e['id']: e for e in load('events.json')}
+    old_notices = {n['id']: n for n in load('notices.json') if (n.get('source') == '채용공고') == jobs}
+    old_events = {e['id']: e for e in load('events.json') if (e.get('source') == '채용공고') == jobs}
     previous_signature = None
     for page in range(1, max_pages+1):
-        html = initial if page == 1 else request_page(session, fields, p_page=str(page))
-        entries, page_soup = parse_list(html)
+        html = initial if page == 1 else request_page(session, fields, base=base, p_page=str(page))
+        entries, page_soup = parse_list(html, base)
         signature = tuple((a.get('href'), a.get_text(' ', strip=True)) for a in page_soup.select('table.tb3 tbody tr:not(.notice) td:nth-child(2) a'))
         if page > 1 and (not signature or signature == previous_signature):
             raise RuntimeError('GoPage 페이지 이동이 동작하지 않습니다. JS 요청 방식 확인 필요')
@@ -221,6 +222,9 @@ def crawl(max_pages=30, delay=3.0):
                 if m:
                     normal_dates.append(iso(*m.groups()))
         for notice in entries:
+            if jobs:
+                notice['id'] = 'jobs-' + notice['id']
+                notice['source'] = '채용공고'
             all_notices[notice['id']] = notice
         print(f'page={page} qualifying={len(entries)} normal_dates={normal_dates[:2]}')
         if page > 1 and not normal_dates:
@@ -238,14 +242,14 @@ def crawl(max_pages=30, delay=3.0):
         try:
             # The saved official detail page uses GET query parameters, not POST.
             params = dict(fields)
-            params.update(p_idx=notice['id'], p_mode='view')
-            response = session.get(BASE, params=params, timeout=25)
+            params.update(p_idx=notice['id'].removeprefix('jobs-') if jobs else notice['id'], p_mode='view')
+            response = session.get(base, params=params, timeout=25)
             response.raise_for_status()
             response.encoding = response.apparent_encoding or 'utf-8'
             detail = response.text
             body = detail_text(detail, notice['id'])
             detail_ok += 1
-            for event in extract_events(body, notice):
+            for event in (extract_job_events(body, notice) if jobs else extract_events(body, notice)):
                 all_events[event['id']] = event
         except (requests.RequestException, RuntimeError) as exc:
             detail_failed += 1
@@ -253,7 +257,7 @@ def crawl(max_pages=30, delay=3.0):
             # Preserve previously verified events when detail temporarily fails.
             for event in old_events.values():
                 if event.get('notice_id') == notice['id']:
-                    if student_council_notice('', notice):
+                    if not jobs and student_council_notice('', notice):
                         event = {**event, 'category': '학생회'}
                     all_events[event['id']] = event
                     restored_events += 1
@@ -267,8 +271,65 @@ def crawl(max_pages=30, delay=3.0):
         raise RuntimeError('모든 공지 상세 페이지 접근 실패: 기존 JSON 파일을 유지합니다')
     # Retain previous notices if temporarily missing from the source, avoiding destructive updates.
     all_notices = {**old_notices, **all_notices}
-    return sorted(all_notices.values(), key=lambda x: (x['date'], int(x['id'])), reverse=True), list(all_events.values())
+    return list(all_notices.values()), list(all_events.values())
 
+
+
+# 채용공고: 명시적인 지원/접수/모집기간 또는 마감일만 일정으로 생성.
+# 게시일, 행사일, 선착순 문구만으로는 캘린더 일정을 만들지 않습니다.
+JOB_LABEL = re.compile(
+    r'(지원\s*기간|접수\s*기간|모집\s*기간|채용\s*기간|'
+    r'지원\s*마감(?:일)?|접수\s*마감(?:일)?|모집\s*마감(?:일)?|'
+    r'서류\s*마감(?:일)?|지원\s*기한|접수\s*기한|모집\s*기한)\s*[:：]?\s*'
+)
+
+
+def extract_job_events(body, notice):
+    events = []
+    for label in JOB_LABEL.finditer(body):
+        segment = body[label.end():label.end()+145].split('\n')[0]
+        dates = list(re.finditer(FULL, segment))
+        if not dates:
+            continue
+        start = iso(*dates[0].groups())
+        if not start:
+            continue
+        end = start
+        if len(dates) > 1:
+            between = segment[dates[0].end():dates[1].start()]
+            if not re.search(r'[~～∼–—-]|부터|까지', between):
+                continue
+            end = iso(*dates[1].groups())
+        elif re.search(r'기간', label.group(1)):
+            suffix = segment[dates[0].end():]
+            short = re.match(r'\s*[~～∼–—-]\s*(?:(\d{1,2})\s*[.\-/월]\s*)?(\d{1,2})\s*일?', suffix)
+            if short:
+                end = iso(dates[0].group(1), short.group(1) or dates[0].group(2), short.group(2))
+            else:
+                # 기간 시작일만 있으면 종료일을 추측하지 않습니다.
+                continue
+        if not end or end < start or (date.fromisoformat(end) - date.fromisoformat(start)).days > 180:
+            continue
+        event = {
+            'id': f"{notice['id']}-{start}-{end}-{label.start()}",
+            'title': notice['title'] + ' · ' + label.group(1),
+            'start': start, 'end': end, 'category': '인턴십',
+            'source': '채용공고', 'url': notice['url'],
+            'notice_id': notice['id'], 'evidence': label.group(1) + ': ' + segment[:100]
+        }
+        if not any(e['start'] == start and e['end'] == end and e['title'] == event['title'] for e in events):
+            events.append(event)
+    return events
+
+
+def crawl(max_pages=30, delay=3.0):
+    # 어느 한 게시판이 실패해도 잘못된 부분 데이터로 JSON을 덮어쓰지 않도록
+    # 두 게시판 모두 수집이 끝난 후 main()에서 저장합니다.
+    notices1, events1 = crawl_board(max_pages, delay, BASE, jobs=False)
+    notices2, events2 = crawl_board(max_pages, delay, JOBS_BASE, jobs=True)
+    notices = {n['id']: n for n in notices1 + notices2}
+    events = {e['id']: e for e in events1 + events2}
+    return sorted(notices.values(), key=lambda n: (n['date'], str(n['id'])), reverse=True), list(events.values())
 
 def load(filename):
     path = ROOT / 'data' / filename
